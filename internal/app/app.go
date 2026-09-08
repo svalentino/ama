@@ -72,9 +72,9 @@ func (application *Application) Command() *cobra.Command {
 	root := &cobra.Command{
 		Use:           "ama [flags] QUESTION",
 		Short:         "Chat with an LLM from your terminal",
-		Long:          "ama is a fast, local-first CLI for persistent conversations with LLMs.",
+		Long:          "ama is a fast, local-first CLI for persistent conversations with LLMs.\n\nUse -- before a question that starts with a command name.",
 		Version:       application.version,
-		Example:       "  ama \"Explain this error\"\n  ama history\n  ama config init --profile work",
+		Example:       "  ama what is the capital of Italy\n  ama -- history of the Roman Empire\n  ama clear -- clear sky today\n  ama config init --profile work",
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Args:          cobra.ArbitraryArgs,
@@ -170,12 +170,16 @@ func (application *Application) ask(ctx context.Context, arguments []string, opt
 
 func (application *Application) clearCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:   "clear",
-		Short: "Clear the current conversation history",
-		Args:  cobra.NoArgs,
-		RunE: func(command *cobra.Command, _ []string) error {
+		Use:     "clear [QUESTION...]",
+		Short:   "Clear the current conversation history",
+		Example: "  ama clear\n  ama clear -- clear sky today",
+		Args:    cobra.ArbitraryArgs,
+		RunE: func(command *cobra.Command, arguments []string) error {
 			if err := application.historyStore.Clear(); err != nil {
 				return err
+			}
+			if len(arguments) > 0 {
+				return application.ask(command.Context(), arguments, askOptions{})
 			}
 			_, err := fmt.Fprintln(command.OutOrStdout(), "Conversation history cleared.")
 			return err

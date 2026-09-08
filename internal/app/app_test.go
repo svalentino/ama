@@ -85,6 +85,102 @@ func TestAskPassesVerboseFlagToProvider(t *testing.T) {
 	}
 }
 
+func TestAskTreatsCommandNameAfterDoubleDashAsQuestion(t *testing.T) {
+	for _, commandName := range []string{"ask", "clear", "completion", "config", "help", "history"} {
+		t.Run(commandName, func(t *testing.T) {
+			directory := t.TempDir()
+			configStore := config.NewStoreAt(filepath.Join(directory, "config.yaml"))
+			if err := configStore.Save(config.Default("work")); err != nil {
+				t.Fatalf("Save() error = %v", err)
+			}
+			historyStore := history.NewStoreAt(filepath.Join(directory, "history.json"))
+			if err := historyStore.Save([]llm.Message{
+				{Role: "user", Content: "Previous question"},
+				{Role: "assistant", Content: "Previous answer"},
+			}); err != nil {
+				t.Fatalf("Save() error = %v", err)
+			}
+			provider := &fakeProvider{response: "Answer"}
+			application := newWithStores(provider, io.Discard, configStore, historyStore, "dev")
+
+			if err := application.Run(context.Background(), []string{"--", commandName, "question"}); err != nil {
+				t.Fatalf("Run() error = %v", err)
+			}
+			messages := provider.request.Messages
+			if len(messages) != 3 || messages[2].Content != commandName+" question" {
+				t.Fatalf("provider messages = %#v", messages)
+			}
+		})
+	}
+}
+
+func TestClearStartsFreshConversationWhenGivenQuestion(t *testing.T) {
+	directory := t.TempDir()
+	configStore := config.NewStoreAt(filepath.Join(directory, "config.yaml"))
+	if err := configStore.Save(config.Default("work")); err != nil {
+		t.Fatalf("Save() error = %v", err)
+	}
+	historyStore := history.NewStoreAt(filepath.Join(directory, "history.json"))
+	if err := historyStore.Save([]llm.Message{
+		{Role: "user", Content: "Old question"},
+		{Role: "assistant", Content: "Old answer"},
+	}); err != nil {
+		t.Fatalf("Save() error = %v", err)
+	}
+	provider := &fakeProvider{response: "Fresh answer"}
+	var output bytes.Buffer
+	application := newWithStores(provider, &output, configStore, historyStore, "dev")
+
+	if err := application.Run(context.Background(), []string{"clear", "--", "clear", "sky", "today?"}); err != nil {
+		t.Fatalf("Run(clear question) error = %v", err)
+	}
+	if len(provider.request.Messages) != 1 || provider.request.Messages[0].Content != "clear sky today?" {
+		t.Fatalf("provider messages = %#v", provider.request.Messages)
+	}
+	if output.String() != "Fresh answer\n" {
+		t.Fatalf("output = %q", output.String())
+	}
+
+	messages, err := historyStore.Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if len(messages) != 2 || messages[0].Content != "clear sky today?" || messages[1].Content != "Fresh answer" {
+		t.Fatalf("history = %#v", messages)
+	}
+}
+
+func TestClearRemovesCurrentConversation(t *testing.T) {
+	directory := t.TempDir()
+	historyStore := history.NewStoreAt(filepath.Join(directory, "history.json"))
+	if err := historyStore.Save([]llm.Message{{Role: "user", Content: "Old question"}}); err != nil {
+		t.Fatalf("Save() error = %v", err)
+	}
+	var output bytes.Buffer
+	application := newWithStores(
+		&fakeProvider{},
+		&output,
+		config.NewStoreAt(filepath.Join(directory, "config.yaml")),
+		historyStore,
+		"dev",
+	)
+
+	if err := application.Run(context.Background(), []string{"clear"}); err != nil {
+		t.Fatalf("Run(clear) error = %v", err)
+	}
+	if output.String() != "Conversation history cleared.\n" {
+		t.Fatalf("output = %q", output.String())
+	}
+
+	messages, err := historyStore.Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if len(messages) != 0 {
+		t.Fatalf("history = %#v", messages)
+	}
+}
+
 func TestVersionFlag(t *testing.T) {
 	directory := t.TempDir()
 	var output bytes.Buffer

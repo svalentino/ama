@@ -64,6 +64,12 @@ Then ask something:
 ama "Explain the difference between an IAM role and an IAM user."
 ```
 
+Use `--` when a question starts with a command name so ama treats everything after it as the question:
+
+```sh
+ama -- history of the Roman Empire
+```
+
 Follow-ups reuse the same conversation. ama remembers context so you do not have to paste the previous answer back into the machine that just produced it.
 
 ```sh
@@ -75,6 +81,12 @@ Start fresh when the conversation has accumulated too much character development
 
 ```sh
 ama clear
+```
+
+To clear the history and immediately ask a question, place it after `--`:
+
+```sh
+ama clear -- clear sky today
 ```
 
 ## Configuration
