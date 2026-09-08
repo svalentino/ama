@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="280" viewBox="0 0 960 280" role="img" aria-labelledby="title description">
+  <title id="title">ama</title>
+  <desc id="description">Three model connections converge into a terminal prompt beside the ama wordmark and the line one shell, many models.</desc>
+
+  <rect width="960" height="280" rx="8" fill="#0b0f12"/>
+  <rect x="1" y="1" width="958" height="278" rx="7" fill="none" stroke="#263035" stroke-width="2"/>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M57 72h31c25 0 27 43 53 55l12 6" stroke="#ff6b57" stroke-width="5"/>
+    <path d="M57 140h96" stroke="#b7f968" stroke-width="5"/>
+    <path d="M57 208h31c25 0 27-43 53-55l12-6" stroke="#4edfe7" stroke-width="5"/>
+    <path d="M160 65h-10c-10 0-18 8-18 18v114c0 10 8 18 18 18h10" stroke="#718087" stroke-width="4"/>
+    <path d="M220 65h10c10 0 18 8 18 18v114c0 10-8 18-18 18h-10" stroke="#718087" stroke-width="4"/>
+    <path d="m169 105 35 35-35 35" stroke="#b7f968" stroke-width="10"/>
+    <path d="M197 176h26" stroke="#ff6b57" stroke-width="10"/>
+  </g>
+
+  <circle cx="50" cy="72" r="9" fill="#ff6b57"/>
+  <circle cx="50" cy="140" r="9" fill="#b7f968"/>
+  <circle cx="50" cy="208" r="9" fill="#4edfe7"/>
+
+  <text x="300" y="164" fill="#b7f968" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="72" font-weight="700" letter-spacing="0">$</text>
+  <text x="365" y="164" fill="#f3f6f1" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="116" font-weight="700" letter-spacing="0">ama</text>
+  <rect x="590" y="79" width="13" height="88" rx="2" fill="#4edfe7"/>
+
+  <path d="M304 193h299" stroke="#263035" stroke-width="2"/>
+  <text x="304" y="226" fill="#a8b3b7" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="21" font-weight="600" letter-spacing="0">ONE SHELL / MANY MODELS</text>
+
+  <g fill="#718087">
+    <circle cx="861" cy="75" r="4"/>
+    <circle cx="879" cy="75" r="4"/>
+    <circle cx="897" cy="75" r="4"/>
+  </g>
+  <path d="M838 205h59" stroke="#263035" stroke-width="2" stroke-linecap="round"/>
+</svg>

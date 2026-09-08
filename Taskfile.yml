@@ -1,0 +1,74 @@
+version: '3'
+
+vars:
+  BINARY: ama
+  BUILD_DIR: bin
+  BINDIR:
+    sh: |
+      if [ -n "$(go env GOBIN)" ]; then
+        go env GOBIN
+      else
+        printf '%s/bin' "$(go env GOPATH)"
+      fi
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  # GO internal Targets
+  go.fmt:
+    desc: Format Go source files
+    cmds:
+      - gofmt -w $(find . -name '*.go' -not -path './vendor/*')
+
+  go.fmt-check:
+    desc: Verify Go source files are formatted
+    cmds:
+      - test -z "$(gofmt -l $(find . -name '*.go' -not -path './vendor/*'))"
+
+  go.test:
+    desc: Run all tests
+    cmds:
+      - go test ./...
+
+  go.vet:
+    desc: Run Go's static analyzer
+    cmds:
+      - go vet ./...
+
+  # Main entrypoints
+  lint:
+    desc: Run all linters
+    deps:
+      - go.fmt-check
+      - go.vet
+
+  test:
+    desc: Run all tests
+    deps:
+      - go.test
+
+  check:
+    desc: Format-check, test, and vet
+    deps:
+      - lint
+      - test
+
+  build:
+    desc: Build the ama binary
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -trimpath -ldflags='-s -w' -o {{.BUILD_DIR}}/{{.BINARY}} ./cmd/ama
+
+  install:
+    desc: Install ama to GOBIN or GOPATH/bin; override with BINDIR=/path
+    deps: [build]
+    cmds:
+      - mkdir -p {{.BINDIR}}
+      - install -m 0755 {{.BUILD_DIR}}/{{.BINARY}} {{.BINDIR}}/{{.BINARY}}
+
+  run:
+    desc: Run ama; pass arguments with --
+    cmds:
+      - go run ./cmd/ama -- {{.CLI_ARGS}}
